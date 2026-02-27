@@ -42,6 +42,7 @@ state = {
     "start_date": datetime.datetime.now().strftime("%d %B %Y"),
     "daily_data": [],
     "status": "playing",
+    "next_game_at": None,
     "think_times": {
         "claude": {"avg": 0, "total": 0, "count": 0, "history": []},
         "gpt":    {"avg": 0, "total": 0, "count": 0, "history": []}
@@ -231,8 +232,13 @@ def game_loop():
 
         # Délai intelligent entre les parties
         delay = get_delay()
+        next_game_at = int((time.time() + delay) * 1000)
+        state["next_game_at"] = next_game_at
+        save_state()
         print(f"⏳ Prochaine partie dans {delay//60} minutes...")
         time.sleep(delay)
+        state["next_game_at"] = None
+        save_state()
 
 # ── Serveur Flask ─────────────────────────────────────────────────────────────
 app = Flask(__name__)

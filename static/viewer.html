@@ -420,14 +420,38 @@ function ui() {
     return Math.round(entries.reduce((s, e) => s + e.ms, 0) / entries.length);
   }
 
+  window._nextGameAt = S.next_game_at || null;
   window._thinkData = {
     claude: S.think_times?.claude?.history || [],
     gpt:    S.think_times?.gpt?.history    || []
   };
   refreshThinkDropdowns();
+  updateNextGame(S.next_game_at);
 }
 
 // ── Accordion ────────────────────────────────────────────────────────────
+function updateNextGame(nextGameAt) {
+  const el = document.getElementById("next-game-txt");
+  if (!el) return;
+  if (!nextGameAt) {
+    el.innerHTML = "";
+    return;
+  }
+  const diff = nextGameAt - Date.now();
+  if (diff <= 0) {
+    el.innerHTML = "Prochaine partie <span>imminente...</span>";
+    return;
+  }
+  const m = Math.floor(diff / 60000);
+  const s = Math.floor((diff % 60000) / 1000);
+  el.innerHTML = `Prochaine partie dans <span>${m}m ${s.toString().padStart(2,"0")}s</span>`;
+}
+
+// Refresh timer every second
+setInterval(() => {
+  if (window._nextGameAt) updateNextGame(window._nextGameAt);
+}, 1000);
+
 function refreshThinkDropdowns() {
   const data = window._thinkData;
   if (!data) return;
