@@ -405,8 +405,6 @@ function ui() {
   renderBoard();
   document.getElementById("gnum").textContent     = "#"+S.gameNumber;
   document.getElementById("turn-txt").textContent = S.turn==="white" ? "Claude joue" : "ChatGPT joue";
-  window._nextGameAt = S.next_game_at || null;
-  updateNextGame(window._nextGameAt);
   document.getElementById("sc-claude").textContent = S.scores.claude;
   document.getElementById("sc-gpt").textContent    = S.scores.gpt;
   document.getElementById("th-claude").classList.toggle("on", S.turn==="white");
@@ -442,28 +440,6 @@ function ui() {
 }
 
 // ── Accordion ────────────────────────────────────────────────────────────
-function updateNextGame(nextGameAt) {
-  const el = document.getElementById("next-game-txt");
-  if (!el) return;
-  if (!nextGameAt) {
-    el.innerHTML = "";
-    return;
-  }
-  const diff = nextGameAt - Date.now();
-  if (diff <= 0) {
-    el.innerHTML = "Prochaine partie <span>imminente...</span>";
-    return;
-  }
-  const m = Math.floor(diff / 60000);
-  const s = Math.floor((diff % 60000) / 1000);
-  el.innerHTML = `Prochaine partie dans <span>${m}m ${s.toString().padStart(2,"0")}s</span>`;
-}
-
-// Refresh timer every second
-setInterval(() => {
-  if (window._nextGameAt) updateNextGame(window._nextGameAt);
-}, 1000);
-
 function refreshThinkDropdowns() {
   const data = window._thinkData;
   if (!data) return;

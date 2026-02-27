@@ -77,6 +77,7 @@ Position actuelle (FEN) : {board.fen()}
 Coups légaux disponibles : {', '.join(legal_moves)}
 
 Réponds UNIQUEMENT avec un coup en notation SAN (ex: e4, Nf3, O-O).
+Si un pion atteint la dernière rangée, indique toujours la promotion (ex: e8=Q).
 Ne donne aucune explication, juste le coup."""
 
     t0 = time.time()
@@ -97,6 +98,7 @@ Position actuelle (FEN) : {board.fen()}
 Coups légaux disponibles : {', '.join(legal_moves)}
 
 Réponds UNIQUEMENT avec un coup en notation SAN (ex: e5, Nf6, O-O-O).
+Si un pion atteint la dernière rangée, indique toujours la promotion (ex: e1=Q).
 Ne donne aucune explication, juste le coup."""
 
     t0 = time.time()
