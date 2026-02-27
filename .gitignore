@@ -1,0 +1,6 @@
+.env
+state.json
+games.pgn
+__pycache__/
+*.pyc
+.DS_Store
