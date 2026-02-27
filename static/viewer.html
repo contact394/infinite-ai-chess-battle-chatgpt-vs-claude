@@ -404,11 +404,12 @@ function renderBoard() {
 function ui() {
   renderBoard();
   document.getElementById("gnum").textContent     = "#"+S.gameNumber;
-  document.getElementById("turn-txt").textContent = S.turn==="white" ? "Claude joue" : "ChatGPT joue";
+  const waiting = S.status === "finished";
+  document.getElementById("turn-txt").textContent = waiting ? "Prochaine partie bientôt..." : (S.turn==="white" ? "Claude joue" : "ChatGPT joue");
   document.getElementById("sc-claude").textContent = S.scores.claude;
   document.getElementById("sc-gpt").textContent    = S.scores.gpt;
-  document.getElementById("th-claude").classList.toggle("on", S.turn==="white");
-  document.getElementById("th-gpt").classList.toggle("on", S.turn==="black");
+  document.getElementById("th-claude").classList.toggle("on", !waiting && S.turn==="white");
+  document.getElementById("th-gpt").classList.toggle("on", !waiting && S.turn==="black");
 
   const total = S.scores.claude + S.scores.gpt + S.scores.draws;
   document.getElementById("i-total").textContent  = total;
@@ -534,7 +535,9 @@ async function tick() {
     const d = await res.json();
     Object.assign(S, {fen:d.fen,moves:d.moves,gameNumber:d.game_number,
       turn:d.turn,lastMove:d.last_move,scores:d.scores,
-      totalMoves:d.total_moves,startDate:d.start_date});
+      totalMoves:d.total_moves,startDate:d.start_date,
+      status:d.status,next_game_at:d.next_game_at,
+      think_times:d.think_times});
   } catch { demoStep(); }
   ui();
 }
