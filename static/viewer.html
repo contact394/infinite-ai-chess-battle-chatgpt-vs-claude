@@ -36,8 +36,14 @@
     text-underline-offset: 6px;
     text-decoration-thickness: 2px;
     text-align: center;
-    margin-bottom: 24px;
+    margin-bottom: 8px;
   }
+  .title-wrap { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; margin-bottom:8px; }
+  .live-badge { display:flex; align-items:center; gap:6px; background:rgba(220,30,30,0.15); border:1px solid rgba(220,30,30,0.4); border-radius:20px; padding:5px 12px; font-size:0.7rem; font-family:'DM Sans',sans-serif; font-weight:700; letter-spacing:0.12em; color:#ff4444; }
+  .live-dot { width:8px; height:8px; border-radius:50%; background:#ff4444; animation:blink 1.2s ease-in-out infinite; flex-shrink:0; }
+  @keyframes blink { 0%,100%{opacity:1;} 50%{opacity:0.15;} }
+  .next-game { text-align:center; font-size:0.78rem; color:rgba(255,255,255,0.45); margin-bottom:20px; min-height:18px; letter-spacing:0.03em; }
+  .next-game span { color:#e8622a; font-weight:600; }
 
   /* ── Arena ── */
   .arena {
@@ -162,7 +168,11 @@
 </head>
 <body>
 
-<h1>Infinite AI Chess Battle</h1>
+<div class="title-wrap">
+        <h1>Infinite AI Chess Battle</h1>
+        <div class="live-badge"><div class="live-dot"></div>LIVE 24/7</div>
+      </div>
+      <div class="next-game" id="next-game-txt"></div>
 
 <div class="arena">
 
@@ -395,6 +405,8 @@ function ui() {
   renderBoard();
   document.getElementById("gnum").textContent     = "#"+S.gameNumber;
   document.getElementById("turn-txt").textContent = S.turn==="white" ? "Claude joue" : "ChatGPT joue";
+  window._nextGameAt = S.next_game_at || null;
+  updateNextGame(window._nextGameAt);
   document.getElementById("sc-claude").textContent = S.scores.claude;
   document.getElementById("sc-gpt").textContent    = S.scores.gpt;
   document.getElementById("th-claude").classList.toggle("on", S.turn==="white");
@@ -480,6 +492,18 @@ function refreshThinkDropdowns() {
     });
   });
 }
+
+function updateNextGame(ts) {
+  const el = document.getElementById("next-game-txt");
+  if (!el) return;
+  if (!ts) { el.innerHTML = ""; return; }
+  const diff = ts - Date.now();
+  if (diff <= 0) { el.innerHTML = "Prochaine partie <span>imminente...</span>"; return; }
+  const m = Math.floor(diff / 60000);
+  const s = Math.floor((diff % 60000) / 1000);
+  el.innerHTML = "Prochaine partie dans <span>" + m + "m " + String(s).padStart(2,"0") + "s</span>";
+}
+setInterval(() => { if (window._nextGameAt) updateNextGame(window._nextGameAt); }, 1000);
 
 function toggleInfo() {
   document.getElementById("more-btn").classList.toggle("open");

@@ -251,6 +251,10 @@ def api_state():
 def index():
     return app.send_static_file("viewer.html")
 
+@app.route("/mentions-legales.html")
+def mentions():
+    return app.send_static_file("mentions-legales.html")
+
 # ── Démarrage ─────────────────────────────────────────────────────────────────
 if __name__ == "__main__":
     # Lancer la boucle de jeu dans un thread séparé
