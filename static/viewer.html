@@ -103,7 +103,7 @@
   #board {
     display: grid;
     grid-template-columns: repeat(8, 1fr);
-    width: clamp(320px, 42vw, 540px);
+    width: clamp(288px, 38vw, 486px);
     aspect-ratio: 1;
     border-radius: 3px;
     overflow: hidden;
@@ -206,7 +206,7 @@
     .thinking-dots { height:10px; }
 
     /* Board plus petit */
-    #board { width: clamp(280px, 92vw, 400px); }
+    #board { width: clamp(252px, 83vw, 360px); }
 
     /* Infos générales : 2 colonnes au lieu de 4 */
     .gen-grid { grid-template-columns:1fr 1fr; }
@@ -288,10 +288,10 @@
   <div class="info-panel" id="panel-gen">
     <div class="info-inner">
       <div class="gen-grid">
-        <div class="info-item"><span class="info-lbl">Première partie</span><span class="info-val" id="i-start">—</span></div>
-        <div class="info-item"><span class="info-lbl">Games jouées</span><span class="info-val" id="i-total">0</span></div>
-        <div class="info-item"><span class="info-lbl">Games nulles</span><span class="info-val" id="i-draws">0</span></div>
-        <div class="info-item"><span class="info-lbl">Coups totaux</span><span class="info-val" id="i-moves">0</span></div>
+        <div class="info-item"><span class="info-lbl">First game</span><span class="info-val" id="i-start">—</span></div>
+        <div class="info-item"><span class="info-lbl">Games played</span><span class="info-val" id="i-total">0</span></div>
+        <div class="info-item"><span class="info-lbl">Draws</span><span class="info-val" id="i-draws">0</span></div>
+        <div class="info-item"><span class="info-lbl">Total moves</span><span class="info-val" id="i-moves">0</span></div>
       </div>
     </div>
   </div>
@@ -486,13 +486,14 @@ function ui() {
     return Math.round(entries.reduce((s, e) => s + e.ms, 0) / entries.length);
   }
 
-  window._nextGameAt = S.next_game_at || null;
+  window._nextGameAt = (S.status === "finished") ? (S.next_game_at || null) : null;
+  window._currentStatus = S.status;
   window._thinkData = {
     claude: S.think_times?.claude?.history || [],
     gpt:    S.think_times?.gpt?.history    || []
   };
   refreshThinkDropdowns();
-  updateNextGame(S.next_game_at);
+  updateNextGame(window._nextGameAt, S.status);
 }
 
 // ── Accordion ────────────────────────────────────────────────────────────
@@ -525,8 +526,9 @@ function refreshThinkDropdowns() {
   });
 }
 
-function updateNextGame(ts) {
+function updateNextGame(ts, status) {
   const el = document.getElementById("next-game-txt");
+  if (status !== "finished") { el.textContent = ""; return; }
   if (!el) return;
   if (!ts) { el.innerHTML = ""; return; }
   const diff = ts - Date.now();
@@ -535,7 +537,7 @@ function updateNextGame(ts) {
   const s = Math.floor((diff % 60000) / 1000);
   el.innerHTML = "Next game in <span>" + m + "m " + String(s).padStart(2,"0") + "s</span>";
 }
-setInterval(() => { if (window._nextGameAt) updateNextGame(window._nextGameAt); }, 1000);
+setInterval(() => { if (window._nextGameAt) updateNextGame(window._nextGameAt, S.status); }, 1000);
 
 function togglePanel(id) {
   const panel = document.getElementById("panel-"+id);
