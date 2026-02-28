@@ -197,9 +197,31 @@
   }
   .footer-bottom a { text-decoration:underline; text-underline-offset:3px; }
   .footer-bottom a:hover { color:rgba(255,255,255,.6); }
-  @media(max-width:600px) {
-    .footer-grid { grid-template-columns:1fr 1fr; }
-    .footer-bottom { flex-direction:column; align-items:flex-start; }
+  @media(max-width:640px) {
+    /* Arena : empile joueurs + board verticalement */
+    .arena { flex-direction:column; align-items:center; gap:16px; }
+    .player { flex-direction:row; width:100%; justify-content:space-between; padding:0 8px; gap:12px; }
+    .player-logo { width:48px; height:48px; }
+    .player-score { font-size:2.2rem; }
+    .thinking-dots { height:10px; }
+
+    /* Board plus petit */
+    #board { width: clamp(280px, 92vw, 400px); }
+
+    /* Infos générales : 2 colonnes au lieu de 4 */
+    .gen-grid { grid-template-columns:1fr 1fr; }
+
+    /* Stats IA : empile les colonnes */
+    .ai-grid { grid-template-columns:1fr; }
+    .ai-col.gpt { border-right:none; border-bottom:1px solid rgba(255,255,255,.1); padding-bottom:16px; padding-left:0; }
+    .ai-col.cla { padding-top:16px; }
+
+    /* Footer */
+    .footer-nav { gap:16px; }
+    .footer-bottom { flex-direction:column; align-items:center; text-align:center; }
+
+    /* Title */
+    .title-wrap { padding:0 12px; }
   }
 </style>
 </head>
