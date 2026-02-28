@@ -211,10 +211,15 @@
     /* Infos générales : 2 colonnes au lieu de 4 */
     .gen-grid { grid-template-columns:1fr 1fr; }
 
-    /* Stats IA : empile les colonnes */
+    /* Stats IA : empile les colonnes, tout centré */
     .ai-grid { grid-template-columns:1fr; }
-    .ai-col.gpt { border-right:none; border-bottom:1px solid rgba(255,255,255,.1); padding-bottom:16px; padding-left:0; }
-    .ai-col.cla { padding-top:16px; }
+    .ai-col { width:100%; padding:0; align-items:center; text-align:center; }
+    .ai-col.gpt { border-right:none; border-bottom:1px solid rgba(255,255,255,.1); padding-bottom:20px; }
+    .ai-col.cla { padding-top:20px; padding-right:0; }
+    .ai-col-title { width:100%; text-align:center; }
+    .ai-col-model { width:100%; text-align:center; }
+    .ai-row { width:100%; align-items:center; }
+    .info-inner { padding:16px; }
 
     /* Footer */
     .footer-nav { gap:16px; }
