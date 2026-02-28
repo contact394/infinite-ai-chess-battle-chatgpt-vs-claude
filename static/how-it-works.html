@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How It Works — Infinite AI Chess Battle</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root { --bg:#0b2d25; --claude:#e8622a; --text:#ffffff; --muted:rgba(255,255,255,0.55); }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { background:var(--bg); color:var(--text); font-family:'DM Sans',sans-serif; min-height:100vh; padding:48px 24px; }
+  .wrap { max-width:760px; margin:0 auto; }
+  h1 { font-family:'Bebas Neue',sans-serif; font-size:2.5rem; letter-spacing:0.08em; color:var(--claude); margin-bottom:8px; }
+  .subtitle { color:var(--muted); font-size:0.9rem; margin-bottom:48px; }
+  h2 { font-family:'Bebas Neue',sans-serif; font-size:1.3rem; letter-spacing:0.1em; color:var(--claude); margin:36px 0 12px; }
+  p { line-height:1.75; color:rgba(255,255,255,0.85); margin-bottom:12px; }
+  a { color:var(--claude); text-decoration:underline; text-underline-offset:3px; }
+  .back { display:inline-block; margin-bottom:40px; font-size:0.85rem; color:var(--muted); text-decoration:none; transition:color 0.2s; }
+  .back:hover { color:var(--text); }
+  hr { border:none; border-top:1px solid rgba(255,255,255,0.08); margin:40px 0; }
+  footer { margin-top:64px; font-size:0.75rem; color:var(--muted); text-align:center; font-style:italic; }
+  .kofi-btn { display:inline-flex; align-items:center; gap:8px; background:#e8622a; color:#fff; font-size:.85rem; font-weight:600; padding:10px 20px; border-radius:8px; margin-top:16px; text-decoration:none; transition:opacity .2s; }
+  .kofi-btn:hover { opacity:.85; color:#fff; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="/">← Back to live</a>
+  
+  <h1>How It Works</h1>
+  <p class="subtitle">No chess engine. No opening book. Just two language models, reasoning move by move.</p>
+
+  <h2>The setup</h2>
+  <p>A Python backend runs continuously on a cloud server. After each game ends, it waits a few minutes, then starts a new one — automatically, indefinitely.</p>
+
+  <h2>How each move is made</h2>
+  <p>At every turn, the active AI receives the current board position in FEN notation, along with the full list of legal moves available. It is asked to reply with a single move — nothing else.</p>
+  <p>No chess engine assists the decision. No opening database is consulted. The model reasons purely from its training, pattern recognition, and language understanding of chess notation.</p>
+
+  <h2>What happens if a move is illegal?</h2>
+  <p>Occasionally, a model will suggest an illegal or malformed move. The system automatically retries up to three times before choosing a fallback. This is part of what makes the experiment interesting — raw LLM behavior, unfiltered.</p>
+
+  <h2>The models</h2>
+  <p><strong>Claude</strong> uses <strong>Claude Haiku</strong> by Anthropic — a fast, efficient model optimized for speed and cost. <strong>ChatGPT</strong> uses <strong>GPT-4o mini</strong> by OpenAI — similarly positioned as a lightweight, capable model.</p>
+  <p>Both models are chosen at the same tier deliberately — this is a fair fight.</p>
+
+  <h2>The live viewer</h2>
+  <p>The board updates every 3 seconds via a lightweight API. The viewer is a single HTML page with no framework — just vanilla JavaScript rendering SVG chess pieces in real time.</p>
+  <hr>
+  <footer>Infinite AI Chess Battle — © 2026 Victor Vallin</footer>
+</div>
+</body>
+</html>

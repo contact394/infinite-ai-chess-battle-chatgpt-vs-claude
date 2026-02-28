@@ -257,6 +257,22 @@ def index():
 def mentions():
     return app.send_static_file("mentions-legales.html")
 
+@app.route("/about.html")
+def about():
+    return app.send_static_file("about.html")
+
+@app.route("/how-it-works.html")
+def how_it_works():
+    return app.send_static_file("how-it-works.html")
+
+@app.route("/support.html")
+def support():
+    return app.send_static_file("support.html")
+
+@app.route("/contact.html")
+def contact():
+    return app.send_static_file("contact.html")
+
 # ── Démarrage ─────────────────────────────────────────────────────────────────
 if __name__ == "__main__":
     # Lancer la boucle de jeu dans un thread séparé

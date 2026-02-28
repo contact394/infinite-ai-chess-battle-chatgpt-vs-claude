@@ -122,48 +122,85 @@
   .board-status { font-size:.78rem; color:var(--muted); letter-spacing:.05em; text-align:center; }
   .board-status em { color:var(--text); font-style:normal; font-weight:600; }
 
-  /* ── Plus d'infos ── */
-  .bottom { display:flex; flex-direction:column; align-items:center; gap:0; width:100%; max-width:640px; margin-top:18px; }
+  /* ── Panels ── */
+  .bottom { display:flex; flex-direction:column; align-items:center; gap:8px; width:100%; max-width:680px; margin-top:18px; }
 
   .more-btn {
     background:none; border:none; color:var(--text);
-    font-family:'DM Sans',sans-serif; font-size:.9rem;
+    font-family:'DM Sans',sans-serif; font-size:.9rem; font-weight:400;
     cursor:pointer; display:flex; align-items:center; gap:8px;
-    opacity:.65; transition:opacity .2s; padding:4px 0;
+    opacity:.65; transition:opacity .2s; padding:6px 0;
   }
   .more-btn:hover { opacity:1; }
   .more-btn .arr { display:inline-block; transition:transform .3s; font-size:.7rem; }
   .more-btn.open .arr { transform:rotate(180deg); }
 
   .info-panel { max-height:0; overflow:hidden; transition:max-height .45s cubic-bezier(.4,0,.2,1); width:100%; }
-  .info-panel.open { max-height:800px; }
+  .info-panel.open { max-height:600px; }
 
   .info-inner {
     background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.1);
-    border-radius:8px; padding:22px; margin-top:8px;
-    display:flex; flex-direction:column; gap:18px;
+    border-radius:8px; padding:20px 24px; margin-top:4px;
   }
 
-  .cat { display:flex; flex-direction:column; gap:10px; }
-  .cat-title {
-    font-family:'Bebas Neue',sans-serif; font-size:.95rem; letter-spacing:.12em;
-    border-bottom:1px solid rgba(255,255,255,.1); padding-bottom:5px;
+  /* Panel général — centré */
+  .gen-grid {
+    display:grid; grid-template-columns:repeat(4,1fr);
+    gap:12px; text-align:center;
   }
-  .cat.general .cat-title { color:rgba(255,255,255,.65); }
-  .cat.gpt-cat .cat-title { color:#ffffff; }
-  .cat.cla-cat .cat-title { color:var(--claude); }
-
-  .cat-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px 28px; }
-  .info-item { display:flex; flex-direction:column; gap:2px; }
+  .info-item { display:flex; flex-direction:column; gap:4px; }
   .info-lbl { font-size:.6rem; letter-spacing:.15em; text-transform:uppercase; color:var(--muted); }
-  .info-val { font-size:1.05rem; font-weight:600; }
+  .info-val { font-size:1.1rem; font-weight:600; }
 
-  .chart-wrap { margin-top:4px; }
-  .chart-title { font-size:.6rem; letter-spacing:.15em; text-transform:uppercase; color:var(--muted); margin-bottom:8px; }
+  /* Panel IA — deux colonnes */
+  .ai-grid { display:grid; grid-template-columns:1fr 1fr; gap:0; }
+  .ai-col { display:flex; flex-direction:column; gap:12px; padding:0 20px; text-align:center; align-items:center; }
+  .ai-col.gpt { border-right:1px solid rgba(255,255,255,.1); padding-left:0; }
+  .ai-col.cla { padding-right:0; }
 
-  footer { font-size:.7rem; color:var(--muted); font-style:italic; margin-top:14px; }
-  footer a { color:var(--muted); text-decoration:underline; text-underline-offset:3px; }
-  footer a:hover { color:var(--text); }
+  .ai-col-title {
+    font-family:'DM Sans',sans-serif; font-size:.9rem; font-weight:700;
+    color:#ffffff; opacity:1; width:100%;
+  }
+  .ai-col-model {
+    font-family:'DM Sans',sans-serif; font-size:.75rem; font-weight:400;
+    color:var(--muted); margin-top:2px; margin-bottom:6px;
+    border-bottom:1px solid rgba(255,255,255,.1); padding-bottom:10px; width:100%;
+  }
+
+  .ai-row { display:flex; flex-direction:column; gap:2px; align-items:center; }
+  .ai-row-lbl { font-size:.6rem; letter-spacing:.15em; text-transform:uppercase; color:var(--muted); }
+  .ai-val { font-size:1.1rem; font-weight:600; }
+
+  /* ── Footer ── */
+  .site-footer {
+    width:100%; background:#071a14; margin-top:48px;
+    padding:48px 32px 28px; box-sizing:border-box;
+  }
+  .footer-nav {
+    display:flex; flex-wrap:wrap; gap:28px; justify-content:center;
+    max-width:900px; margin:0 auto 32px;
+  }
+  .footer-nav a {
+    font-family:'DM Sans',sans-serif; font-size:.75rem; font-weight:700;
+    letter-spacing:.15em; text-transform:uppercase; color:#ffffff;
+    text-decoration:none; opacity:.85; transition:opacity .2s;
+  }
+  .footer-nav a:hover { opacity:1; }
+  .footer-bottom {
+    max-width:900px; margin:0 auto;
+    border-top:1px solid rgba(255,255,255,.07); padding-top:20px;
+    display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;
+  }
+  .footer-bottom span, .footer-bottom a {
+    font-size:.7rem; color:rgba(255,255,255,.3);
+  }
+  .footer-bottom a { text-decoration:underline; text-underline-offset:3px; }
+  .footer-bottom a:hover { color:rgba(255,255,255,.6); }
+  @media(max-width:600px) {
+    .footer-grid { grid-template-columns:1fr 1fr; }
+    .footer-bottom { flex-direction:column; align-items:flex-start; }
+  }
 </style>
 </head>
 <body>
@@ -178,7 +215,7 @@
 
   <!-- ChatGPT -->
   <div class="player gpt">
-    <div class="player-name">Chat GPT</div>
+    <div class="player-name">ChatGPT</div>
     <div class="player-logo">
       <svg viewBox="0 0 41 41" fill="none" xmlns="http://www.w3.org/2000/svg" width="100" height="100">
         <path d="M37.532 16.87a9.963 9.963 0 0 0-.856-8.184 10.078 10.078 0 0 0-10.855-4.835 9.964 9.964 0 0 0-6.813-3.055 10.079 10.079 0 0 0-9.614 6.977 9.967 9.967 0 0 0-6.664 4.834 10.08 10.08 0 0 0 1.24 11.817 9.965 9.965 0 0 0 .856 8.185 10.079 10.079 0 0 0 10.855 4.835 9.965 9.965 0 0 0 6.812 3.054 10.079 10.079 0 0 0 9.617-6.981 9.967 9.967 0 0 0 6.663-4.834 10.079 10.079 0 0 0-1.241-11.813zM22.498 37.886a7.474 7.474 0 0 1-4.799-1.735c.061-.033.168-.091.237-.134l7.964-4.6a1.294 1.294 0 0 0 .655-1.134V19.054l3.366 1.944a.12.12 0 0 1 .066.092v9.299a7.505 7.505 0 0 1-7.49 7.496zM6.392 31.006a7.471 7.471 0 0 1-.894-5.023c.06.036.162.099.237.141l7.964 4.6a1.297 1.297 0 0 0 1.308 0l9.724-5.614v3.888a.12.12 0 0 1-.048.103l-8.051 4.649a7.504 7.504 0 0 1-10.24-2.744zM4.297 13.62A7.469 7.469 0 0 1 8.2 10.333c0 .068-.004.19-.004.274v9.201a1.294 1.294 0 0 0 .654 1.132l9.723 5.614-3.366 1.944a.12.12 0 0 1-.114.012L7.044 23.86a7.504 7.504 0 0 1-2.747-10.24zm27.658 6.437l-9.724-5.615 3.367-1.943a.121.121 0 0 1 .114-.012l8.048 4.648a7.498 7.498 0 0 1-1.158 13.528v-9.476a1.293 1.293 0 0 0-.647-1.13zm3.35-5.043c-.059-.037-.162-.099-.236-.141l-7.965-4.6a1.298 1.298 0 0 0-1.308 0l-9.723 5.614v-3.888a.12.12 0 0 1 .048-.103l8.05-4.645a7.497 7.497 0 0 1 11.135 7.763zm-21.063 6.929l-3.367-1.944a.12.12 0 0 1-.065-.092v-9.299a7.497 7.497 0 0 1 12.293-5.756 6.94 6.94 0 0 0-.236.134l-7.965 4.6a1.294 1.294 0 0 0-.654 1.132l-.006 11.225zm1.829-3.943l4.33-2.501 4.332 2.5v4.998l-4.331 2.5-4.331-2.5V18z" fill="white"/>
@@ -192,7 +229,7 @@
   <div class="board-wrap">
     <div class="board-shell"><div id="board"></div></div>
     <div class="board-status">
-      Partie <em id="gnum">#1</em> &nbsp;·&nbsp; <em id="turn-txt">Claude joue</em>
+      Game <em id="gnum">#1</em>
     </div>
   </div>
 
@@ -221,55 +258,53 @@
 
 <!-- Bottom -->
 <div class="bottom">
-  <button class="more-btn" id="more-btn" onclick="toggleInfo()">
-    Plus d'infos <span class="arr">▼</span>
+
+  <!-- Panel 1 : Infos générales -->
+  <button class="more-btn" id="more-btn-gen" onclick="togglePanel('gen')">
+    General information <span class="arr" id="arr-gen">▼</span>
   </button>
-  <div class="info-panel" id="info-panel">
+  <div class="info-panel" id="panel-gen">
     <div class="info-inner">
-
-      <div class="cat general">
-        <div class="cat-title">Informations générales</div>
-        <div class="cat-grid">
-          <div class="info-item"><span class="info-lbl">Première partie</span><span class="info-val" id="i-start">—</span></div>
-          <div class="info-item"><span class="info-lbl">Parties jouées</span><span class="info-val" id="i-total">0</span></div>
-          <div class="info-item"><span class="info-lbl">Parties nulles</span><span class="info-val" id="i-draws">0</span></div>
-          <div class="info-item"><span class="info-lbl">Coups totaux</span><span class="info-val" id="i-moves">0</span></div>
-        </div>
+      <div class="gen-grid">
+        <div class="info-item"><span class="info-lbl">Première partie</span><span class="info-val" id="i-start">—</span></div>
+        <div class="info-item"><span class="info-lbl">Games jouées</span><span class="info-val" id="i-total">0</span></div>
+        <div class="info-item"><span class="info-lbl">Games nulles</span><span class="info-val" id="i-draws">0</span></div>
+        <div class="info-item"><span class="info-lbl">Coups totaux</span><span class="info-val" id="i-moves">0</span></div>
       </div>
-
-      <div class="cat gpt-cat">
-        <div class="cat-title">ChatGPT</div>
-        <div class="cat-grid">
-          <div class="info-item"><span class="info-lbl">Modèle</span><span class="info-val">GPT-4o mini</span></div>
-          <div class="info-item"><span class="info-lbl">Coups joués</span><span class="info-val" id="i-gpt-moves">0</span></div>
-          <div class="info-item"><span class="info-lbl">Ratio de victoires</span><span class="info-val" id="i-gpt-ratio">—</span></div>
-          <div class="info-item"><span class="info-lbl">Moy / heure</span><span class="info-val" id="i-gpt-h">—</span></div>
-          <div class="info-item"><span class="info-lbl">Moy / jour</span><span class="info-val" id="i-gpt-d">—</span></div>
-          <div class="info-item"><span class="info-lbl">Moy / semaine</span><span class="info-val" id="i-gpt-w">—</span></div>
-          <div class="info-item"><span class="info-lbl">Moy / mois</span><span class="info-val" id="i-gpt-m">—</span></div>
-          <div class="info-item"><span class="info-lbl">Moy / an</span><span class="info-val" id="i-gpt-y">—</span></div>
-        </div>
-      </div>
-
-      <div class="cat cla-cat">
-        <div class="cat-title">Claude</div>
-        <div class="cat-grid">
-          <div class="info-item"><span class="info-lbl">Modèle</span><span class="info-val">Claude Haiku</span></div>
-          <div class="info-item"><span class="info-lbl">Coups joués</span><span class="info-val" id="i-cla-moves">0</span></div>
-          <div class="info-item"><span class="info-lbl">Ratio de victoires</span><span class="info-val" id="i-cla-ratio">—</span></div>
-          <div class="info-item"><span class="info-lbl">Moy / heure</span><span class="info-val" id="i-cla-h">—</span></div>
-          <div class="info-item"><span class="info-lbl">Moy / jour</span><span class="info-val" id="i-cla-d">—</span></div>
-          <div class="info-item"><span class="info-lbl">Moy / semaine</span><span class="info-val" id="i-cla-w">—</span></div>
-          <div class="info-item"><span class="info-lbl">Moy / mois</span><span class="info-val" id="i-cla-m">—</span></div>
-          <div class="info-item"><span class="info-lbl">Moy / an</span><span class="info-val" id="i-cla-y">—</span></div>
-        </div>
-      </div>
-
-
-
     </div>
   </div>
-  <footer><a href="mentions-legales.html" target="_blank">Mentions légales</a></footer>
+
+  <!-- Panel 2 : IA côte à côte -->
+  <button class="more-btn" id="more-btn-ai" onclick="togglePanel('ai')">
+    AI statistics <span class="arr" id="arr-ai">▼</span>
+  </button>
+  <div class="info-panel" id="panel-ai">
+    <div class="info-inner">
+      <div class="ai-grid">
+        <!-- GPT -->
+        <div class="ai-col gpt">
+          <div class="ai-col-title">ChatGPT</div><div class="ai-col-model">GPT-4o mini</div>
+          <div class="ai-row"><span class="ai-row-lbl">Win rate</span><span class="ai-val" id="i-gpt-ratio">—</span></div>
+          <div class="ai-row"><span class="ai-row-lbl">Avg / hour</span><span class="ai-val" id="i-gpt-h">—</span></div>
+          <div class="ai-row"><span class="ai-row-lbl">Avg / day</span><span class="ai-val" id="i-gpt-d">—</span></div>
+          <div class="ai-row"><span class="ai-row-lbl">Avg / week</span><span class="ai-val" id="i-gpt-w">—</span></div>
+          <div class="ai-row"><span class="ai-row-lbl">Avg / month</span><span class="ai-val" id="i-gpt-m">—</span></div>
+          <div class="ai-row"><span class="ai-row-lbl">Avg / year</span><span class="ai-val" id="i-gpt-y">—</span></div>
+        </div>
+        <!-- Claude -->
+        <div class="ai-col cla">
+          <div class="ai-col-title">Claude</div><div class="ai-col-model">Claude Haiku</div>
+          <div class="ai-row"><span class="ai-row-lbl">Win rate</span><span class="ai-val" id="i-cla-ratio">—</span></div>
+          <div class="ai-row"><span class="ai-row-lbl">Avg / hour</span><span class="ai-val" id="i-cla-h">—</span></div>
+          <div class="ai-row"><span class="ai-row-lbl">Avg / day</span><span class="ai-val" id="i-cla-d">—</span></div>
+          <div class="ai-row"><span class="ai-row-lbl">Avg / week</span><span class="ai-val" id="i-cla-w">—</span></div>
+          <div class="ai-row"><span class="ai-row-lbl">Avg / month</span><span class="ai-val" id="i-cla-m">—</span></div>
+          <div class="ai-row"><span class="ai-row-lbl">Avg / year</span><span class="ai-val" id="i-cla-y">—</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
 </div>
 
 <script>
@@ -405,7 +440,6 @@ function ui() {
   renderBoard();
   document.getElementById("gnum").textContent     = "#"+S.gameNumber;
   const waiting = S.status === "finished";
-  document.getElementById("turn-txt").textContent = waiting ? "Prochaine partie bientôt..." : (S.turn==="white" ? "Claude joue" : "ChatGPT joue");
   document.getElementById("sc-claude").textContent = S.scores.claude;
   document.getElementById("sc-gpt").textContent    = S.scores.gpt;
   document.getElementById("th-claude").classList.toggle("on", !waiting && S.turn==="white");
@@ -416,8 +450,7 @@ function ui() {
   document.getElementById("i-draws").textContent  = S.scores.draws;
   document.getElementById("i-start").textContent  = S.startDate || "—";
   document.getElementById("i-moves").textContent  = S.totalMoves;
-  document.getElementById("i-cla-moves").textContent = Math.ceil(S.totalMoves/2);
-  document.getElementById("i-gpt-moves").textContent = Math.floor(S.totalMoves/2);
+
   document.getElementById("i-cla-ratio").textContent = total>0 ? Math.round(S.scores.claude/total*100)+"%" : "—";
   document.getElementById("i-gpt-ratio").textContent = total>0 ? Math.round(S.scores.gpt/total*100)+"%" : "—";
 
@@ -475,16 +508,20 @@ function updateNextGame(ts) {
   if (!el) return;
   if (!ts) { el.innerHTML = ""; return; }
   const diff = ts - Date.now();
-  if (diff <= 0) { el.innerHTML = "Prochaine partie <span>imminente...</span>"; return; }
+  if (diff <= 0) { el.innerHTML = "Next game <span>starting soon...</span>"; return; }
   const m = Math.floor(diff / 60000);
   const s = Math.floor((diff % 60000) / 1000);
-  el.innerHTML = "Prochaine partie dans <span>" + m + "m " + String(s).padStart(2,"0") + "s</span>";
+  el.innerHTML = "Next game in <span>" + m + "m " + String(s).padStart(2,"0") + "s</span>";
 }
 setInterval(() => { if (window._nextGameAt) updateNextGame(window._nextGameAt); }, 1000);
 
-function toggleInfo() {
-  document.getElementById("more-btn").classList.toggle("open");
-  document.getElementById("info-panel").classList.toggle("open");
+function togglePanel(id) {
+  const panel = document.getElementById("panel-"+id);
+  const arr   = document.getElementById("arr-"+id);
+  const btn   = document.getElementById("more-btn-"+id);
+  panel.classList.toggle("open");
+  btn.classList.toggle("open");
+  arr.style.transform = panel.classList.contains("open") ? "rotate(180deg)" : "";
 }
 
 // ── Chart ─────────────────────────────────────────────────────────────────
@@ -547,5 +584,21 @@ ui();
 setInterval(tick, 3000);
 tick();
 </script>
+<footer class="site-footer">
+  <div class="footer-nav">
+    <a href="/about.html">About</a>
+    <a href="/how-it-works.html">How it works</a>
+    <a href="/support.html">Support</a>
+    <a href="/contact.html">Contact</a>
+    <a href="/mentions-legales.html">Privacy Policy</a>
+  </div>
+  <div class="footer-bottom">
+    <span style="font-size:.65rem;color:rgba(255,255,255,.2);width:100%;margin-bottom:6px;">Game results do not reflect the general capabilities of the AI models involved. This is an independent experiment, not an official benchmark.</span>
+
+  </div>
+</footer>
+
+<p style="text-align:center;font-size:.7rem;color:rgba(255,255,255,.25);padding:20px 0 32px;margin:0;">© 2026 Victor Vallin — Independent project, not affiliated with Anthropic or OpenAI.</p>
+
 </body>
 </html>
