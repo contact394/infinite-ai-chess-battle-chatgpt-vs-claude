@@ -1,6 +1,7 @@
 import os
 import json
 import time
+import requests as req_lib
 import chess
 import chess.pgn
 import datetime
@@ -49,20 +50,32 @@ state = {
     }
 }
 
-STATE_FILE = "state.json"
-PGN_FILE   = "games.pgn"
+PGN_FILE = "games.pgn"
 
-# ── Persistance ───────────────────────────────────────────────────────────────
+# ── Persistance JSONBin ────────────────────────────────────────────────────────
+_BIN_ID  = os.environ.get("JSONBIN_BIN_ID", "")
+_BIN_KEY = os.environ.get("JSONBIN_API_KEY", "")
+_BIN_URL = f"https://api.jsonbin.io/v3/b/{_BIN_ID}"
+_BIN_HDR = {"Content-Type": "application/json", "X-Master-Key": _BIN_KEY}
+
 def save_state():
-    with open(STATE_FILE, "w") as f:
-        json.dump(state, f, indent=2)
+    try:
+        req_lib.put(_BIN_URL, json=state, headers=_BIN_HDR, timeout=10)
+    except Exception as e:
+        print(f"⚠️  JSONBin save error: {e}")
 
 def load_state():
     global state
-    if os.path.exists(STATE_FILE):
-        with open(STATE_FILE) as f:
-            saved = json.load(f)
+    try:
+        r = req_lib.get(_BIN_URL + "/latest", headers=_BIN_HDR, timeout=10)
+        if r.status_code == 200:
+            saved = r.json().get("record", {})
             state.update(saved)
+            print("✅ State loaded from JSONBin")
+        else:
+            print(f"⚠️  JSONBin load error: {r.status_code}")
+    except Exception as e:
+        print(f"⚠️  JSONBin load error: {e}")
 
 # ── Cadence ───────────────────────────────────────────────────────────────────
 def get_delay():

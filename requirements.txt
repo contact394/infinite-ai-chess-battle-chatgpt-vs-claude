@@ -3,3 +3,4 @@ openai
 python-chess
 flask
 python-dotenv
+requests
