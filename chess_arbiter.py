@@ -266,9 +266,9 @@ def api_state():
 def index():
     return app.send_static_file("viewer.html")
 
-@app.route("/mentions-legales.html")
+@app.route("/privacy-policy.html")
 def mentions():
-    return app.send_static_file("mentions-legales.html")
+    return app.send_static_file("privacy-policy.html")
 
 @app.route("/about.html")
 def about():
