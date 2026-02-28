@@ -40,7 +40,7 @@ state = {
     "total_moves": 0,
     "turn": "white",
     "last_move": None,
-    "start_date": datetime.datetime.now().strftime("%d %B %Y"),
+    "start_date": datetime.datetime.now().strftime("%b %d, %Y"),
     "daily_data": [],
     "status": "playing",
     "next_game_at": None,
