@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Game History — Infinite AI Chess Battle</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root { --bg:#0b2d25; --claude:#e8622a; --text:#ffffff; --muted:rgba(255,255,255,0.55); }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { background:var(--bg); color:var(--text); font-family:'DM Sans',sans-serif; min-height:100vh; padding:48px 24px; }
+  .wrap { max-width:860px; margin:0 auto; }
+  h1 { font-family:'Bebas Neue',sans-serif; font-size:2.5rem; letter-spacing:0.08em; color:var(--claude); margin-bottom:8px; }
+  .subtitle { color:var(--muted); font-size:0.9rem; margin-bottom:40px; }
+  .back { display:inline-block; margin-bottom:40px; font-size:0.85rem; color:var(--muted); text-decoration:none; transition:color 0.2s; }
+  .back:hover { color:var(--text); }
+  hr { border:none; border-top:1px solid rgba(255,255,255,0.08); margin:40px 0; }
+  footer { margin-top:64px; font-size:0.75rem; color:var(--muted); text-align:center; font-style:italic; }
+
+  /* Table */
+  table { width:100%; border-collapse:collapse; }
+  thead th {
+    font-size:.6rem; letter-spacing:.15em; text-transform:uppercase;
+    color:var(--muted); padding:10px 14px; text-align:left;
+    border-bottom:1px solid rgba(255,255,255,.1);
+  }
+  tbody tr { border-bottom:1px solid rgba(255,255,255,.05); transition:background .15s; }
+  tbody tr:hover { background:rgba(255,255,255,.03); }
+  tbody td { padding:14px 14px; font-size:.88rem; color:rgba(255,255,255,.85); vertical-align:middle; }
+
+  .badge {
+    display:inline-block; padding:3px 10px; border-radius:20px;
+    font-size:.7rem; font-weight:600; letter-spacing:.05em;
+  }
+  .badge.claude { background:rgba(232,98,42,.15); color:var(--claude); border:1px solid rgba(232,98,42,.3); }
+  .badge.gpt { background:rgba(255,255,255,.08); color:#fff; border:1px solid rgba(255,255,255,.15); }
+  .badge.draw { background:rgba(255,255,255,.05); color:var(--muted); border:1px solid rgba(255,255,255,.1); }
+
+  .lichess-btn {
+    display:inline-flex; align-items:center; gap:5px;
+    font-size:.72rem; color:var(--muted); text-decoration:none;
+    border:1px solid rgba(255,255,255,.1); border-radius:5px;
+    padding:4px 10px; transition:all .2s;
+  }
+  .lichess-btn:hover { color:#fff; border-color:rgba(255,255,255,.3); }
+
+  .loading { text-align:center; color:var(--muted); padding:48px 0; font-size:.9rem; }
+  .empty { text-align:center; color:var(--muted); padding:64px 0; }
+  .empty p { margin-top:8px; font-size:.85rem; }
+
+  @media(max-width:600px) {
+    table { display:block; overflow-x:auto; }
+    h1 { font-size:2rem; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="/">← Back to live</a>
+
+  <h1>Game History</h1>
+  <p class="subtitle">Full transparency — every game, every result. Click "Replay" to analyse any game on Lichess.</p>
+
+  <div id="content">
+    <div class="loading">Loading games...</div>
+  </div>
+
+  <hr>
+  <footer>Infinite AI Chess Battle — © 2026 Victor Vallin — Independent project</footer>
+</div>
+
+<script>
+async function loadHistory() {
+  const container = document.getElementById("content");
+  try {
+    const res = await fetch("/api/history");
+    const data = await res.json();
+    const games = data.games || [];
+
+    if (games.length === 0) {
+      container.innerHTML = `
+        <div class="empty">
+          <strong>No games recorded yet.</strong>
+          <p>History is saved from the next completed game onwards.</p>
+        </div>`;
+      return;
+    }
+
+    const rows = games.map(g => {
+      const badgeClass = g.winner === "Claude" ? "claude" : g.winner === "ChatGPT" ? "gpt" : "draw";
+      const winnerLabel = g.winner === "Draw" ? "Draw" : `${g.winner} wins`;
+
+      // Build Lichess analysis URL from PGN
+      const pgn = encodeURIComponent(g.pgn || "");
+      const lichessUrl = `https://lichess.org/paste?pgn=${pgn}`;
+
+      return `
+        <tr>
+          <td><strong>#${g.game}</strong></td>
+          <td>${g.date}</td>
+          <td><span class="badge ${badgeClass}">${winnerLabel}</span></td>
+          <td>${g.moves} moves</td>
+          <td>${g.result}</td>
+          <td><a class="lichess-btn" href="${lichessUrl}" target="_blank">♟ Replay</a></td>
+        </tr>`;
+    }).join("");
+
+    container.innerHTML = `
+      <table>
+        <thead>
+          <tr>
+            <th>Game</th>
+            <th>Date</th>
+            <th>Result</th>
+            <th>Moves</th>
+            <th>Score</th>
+            <th>Analysis</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>`;
+
+  } catch(e) {
+    container.innerHTML = `<div class="empty"><strong>Could not load history.</strong><p>${e.message}</p></div>`;
+  }
+}
+
+loadHistory();
+</script>
+</body>
+</html>

@@ -58,6 +58,10 @@ _BIN_KEY = os.environ.get("JSONBIN_API_KEY", "")
 _BIN_URL = f"https://api.jsonbin.io/v3/b/{_BIN_ID}"
 _BIN_HDR = {"Content-Type": "application/json", "X-Master-Key": _BIN_KEY}
 
+# History bin
+_HIST_BIN_ID  = os.environ.get("JSONBIN_HISTORY_BIN_ID", "")
+_HIST_BIN_URL = f"https://api.jsonbin.io/v3/b/{_HIST_BIN_ID}"
+
 def save_state():
     try:
         req_lib.put(_BIN_URL, json=state, headers=_BIN_HDR, timeout=10)
@@ -76,6 +80,37 @@ def load_state():
             print(f"⚠️  JSONBin load error: {r.status_code}")
     except Exception as e:
         print(f"⚠️  JSONBin load error: {e}")
+
+def save_game_to_history(game_number, result, pgn_str, move_count):
+    """Append completed game to history bin."""
+    if not _HIST_BIN_ID:
+        return
+    try:
+        # Load current history
+        r = req_lib.get(_HIST_BIN_URL + "/latest", headers=_BIN_HDR, timeout=10)
+        history = r.json().get("record", {}).get("games", []) if r.status_code == 200 else []
+
+        # Map result to label
+        if result == "1-0":
+            winner = "Claude"
+        elif result == "0-1":
+            winner = "ChatGPT"
+        else:
+            winner = "Draw"
+
+        history.append({
+            "game": game_number,
+            "date": datetime.datetime.utcnow().strftime("%Y-%m-%d"),
+            "result": result,
+            "winner": winner,
+            "moves": move_count,
+            "pgn": pgn_str
+        })
+
+        req_lib.put(_HIST_BIN_URL, json={"games": history}, headers=_BIN_HDR, timeout=10)
+        print(f"📚 Game #{game_number} saved to history")
+    except Exception as e:
+        print(f"⚠️  History save error: {e}")
 
 # ── Cadence ───────────────────────────────────────────────────────────────────
 def get_delay():
@@ -234,9 +269,20 @@ def game_loop():
             state["scores"]["draws"] += 1
             winner = "Nulle 🤝"
 
+        # Generate PGN string
+        pgn_game = chess.pgn.Game.from_board(board)
+        pgn_game.headers["Event"] = f"Infinite AI Chess Battle - Game {state['game_number']}"
+        pgn_game.headers["White"] = "Claude (Anthropic)"
+        pgn_game.headers["Black"] = "ChatGPT (OpenAI)"
+        pgn_game.headers["Date"] = datetime.datetime.utcnow().strftime("%Y.%m.%d")
+        pgn_game.headers["Result"] = result
+        pgn_str = str(pgn_game)
+        move_count = board.fullmove_number
+
         print(f"\n🏁 Partie #{state['game_number']} terminée — {winner}")
         print(f"   Score : Claude {state['scores']['claude']} - GPT {state['scores']['gpt']} - Nulles {state['scores']['draws']}\n")
 
+        save_game_to_history(state["game_number"], result, pgn_str, move_count)
         update_daily_data()
         state["game_number"] += 1
         state["moves"]       = []
@@ -285,6 +331,21 @@ def support():
 @app.route("/contact.html")
 def contact():
     return app.send_static_file("contact.html")
+
+@app.route("/history.html")
+def history_page():
+    return app.send_static_file("history.html")
+
+@app.route("/api/history")
+def api_history():
+    if not _HIST_BIN_ID:
+        return jsonify({"games": []})
+    try:
+        r = req_lib.get(_HIST_BIN_URL + "/latest", headers=_BIN_HDR, timeout=10)
+        games = r.json().get("record", {}).get("games", []) if r.status_code == 200 else []
+        return jsonify({"games": list(reversed(games))})
+    except Exception as e:
+        return jsonify({"games": [], "error": str(e)})
 
 # ── Démarrage ─────────────────────────────────────────────────────────────────
 if __name__ == "__main__":
