@@ -204,14 +204,23 @@ def play_move(board, move_san, max_retries=3):
     for attempt in range(max_retries):
         try:
             # Nettoyer la réponse (enlever +, #, ?, ! éventuels)
-            clean = move_san.replace("?", "").replace("!", "").strip()
-            move = board.parse_san(clean)
-            if move in board.legal_moves:
+            clean = move_san.replace("?", "").replace("!", "").replace("+", "").replace("#", "").strip()
+            # Essayer d'abord en notation SAN
+            try:
+                move = board.parse_san(clean)
+            except Exception:
+                # Essayer en notation UCI (ex: e2e4)
+                try:
+                    move = chess.Move.from_uci(clean)
+                except Exception:
+                    move = None
+            if move and move in board.legal_moves:
+                san = board.san(move)
                 uci = move.uci()
                 from_sq = uci[:2]
                 to_sq   = uci[2:4]
                 board.push(move)
-                return clean, from_sq, to_sq
+                return san, from_sq, to_sq
         except Exception:
             pass
 
