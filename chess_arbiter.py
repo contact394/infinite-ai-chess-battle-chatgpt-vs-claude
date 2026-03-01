@@ -77,10 +77,18 @@ def load_state():
             # If bin is fresh (game_number == 1, no games played), reset start_date to today
             if saved.get("game_number", 1) == 1 and saved.get("scores", {}).get("claude", 0) == 0 and saved.get("scores", {}).get("gpt", 0) == 0:
                 saved["start_date"] = datetime.datetime.now().strftime("%b %d, %Y")
-            # Merge with defaults to ensure all keys exist
+            # Deep merge with defaults to ensure all keys exist
             for key, value in state.items():
                 if key not in saved:
                     saved[key] = value
+                elif isinstance(value, dict):
+                    for subkey, subval in value.items():
+                        if subkey not in saved[key]:
+                            saved[key][subkey] = subval
+                        elif isinstance(subval, dict):
+                            for k, v in subval.items():
+                                if k not in saved[key][subkey]:
+                                    saved[key][subkey][k] = v
             state.update(saved)
             print("✅ State loaded from JSONBin")
         else:
