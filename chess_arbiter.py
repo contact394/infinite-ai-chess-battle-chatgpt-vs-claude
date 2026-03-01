@@ -199,30 +199,36 @@ Reply with ONLY the move in SAN notation (e.g. e5, Nf6, O-O-O, e1=Q). No explana
     return response.choices[0].message.content.strip()
 
 # ── Valider et jouer un coup ──────────────────────────────────────────────────
+def parse_move(board, raw):
+    """Tente de parser un coup en SAN ou UCI."""
+    clean = raw.replace("?","").replace("!","").replace("+","").replace("#","").strip()
+    # Essai SAN
+    try:
+        move = board.parse_san(clean)
+        if move in board.legal_moves:
+            return move
+    except Exception:
+        pass
+    # Essai UCI (ex: e2e4, e7e5)
+    try:
+        move = chess.Move.from_uci(clean.lower())
+        if move in board.legal_moves:
+            return move
+    except Exception:
+        pass
+    return None
+
 def play_move(board, move_san, max_retries=3):
     """Tente de jouer un coup, retente si illégal."""
     for attempt in range(max_retries):
-        try:
-            # Nettoyer la réponse (enlever +, #, ?, ! éventuels)
-            clean = move_san.replace("?", "").replace("!", "").replace("+", "").replace("#", "").strip()
-            # Essayer d'abord en notation SAN
-            try:
-                move = board.parse_san(clean)
-            except Exception:
-                # Essayer en notation UCI (ex: e2e4)
-                try:
-                    move = chess.Move.from_uci(clean)
-                except Exception:
-                    move = None
-            if move and move in board.legal_moves:
-                san = board.san(move)
-                uci = move.uci()
-                from_sq = uci[:2]
-                to_sq   = uci[2:4]
-                board.push(move)
-                return san, from_sq, to_sq
-        except Exception:
-            pass
+        move = parse_move(board, move_san)
+        if move:
+            san = board.san(move)
+            uci = move.uci()
+            from_sq = uci[:2]
+            to_sq   = uci[2:4]
+            board.push(move)
+            return san, from_sq, to_sq
 
         # Si échec, demander un nouveau coup
         print(f"  Coup illégal '{move_san}', nouvelle tentative {attempt+1}...")
