@@ -192,21 +192,26 @@ def parse_move(board, raw):
             return move
     except Exception:
         pass
+    # Essai correspondance dans les coups légaux (match partiel)
+    for legal_move in board.legal_moves:
+        if board.san(legal_move).replace("+","").replace("#","") == clean:
+            return legal_move
+        if legal_move.uci() == clean.lower():
+            return legal_move
     return None
 
-def play_move(board, move_san, max_retries=3):
+def play_move(board, move_san, max_retries=5):
     """Tente de jouer un coup, retente si illégal."""
+    legal_moves_san = [board.san(m) for m in board.legal_moves]
     for attempt in range(max_retries):
         move = parse_move(board, move_san)
         if move:
-            san = board.san(move)
             uci = move.uci()
-            from_sq = uci[:2]
-            to_sq   = uci[2:4]
+            san = board.san(move)
             board.push(move)
-            return san, from_sq, to_sq
+            return san, uci[:2], uci[2:4]
 
-        # Si échec, demander un nouveau coup
+        # Si échec, demander un nouveau coup en insistant sur la liste
         print(f"  Coup illégal '{move_san}', nouvelle tentative {attempt+1}...")
         if board.turn == chess.WHITE:
             move_san = ask_claude(board)
