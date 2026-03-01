@@ -138,17 +138,11 @@ def get_delay():
 def ask_claude(board):
     legal_moves = [board.san(m) for m in board.legal_moves]
     move_history = " ".join([board.san(m) for m in board.move_stack]) if board.move_stack else "Game just started"
-    prompt = f"""You are playing chess as WHITE pieces only. It is WHITE's turn to move.
+    prompt = f"""You are playing chess as WHITE. Choose the best move to win.
 
-Current position (FEN): {board.fen()}
-Move history so far: {move_history}
+Legal moves (SAN notation): {', '.join(legal_moves)}
 
-IMPORTANT: You can ONLY play moves from this list of legal White moves:
-{', '.join(legal_moves)}
-
-Do NOT play any Black piece moves. Only choose from the list above.
-Pick the best move to win the game.
-Reply with ONLY one move in SAN notation exactly as shown in the list above. No explanation."""
+Reply with ONLY one move copied exactly from the list above. Nothing else."""
 
     t0 = time.time()
     response = claude_client.messages.create(
@@ -164,17 +158,11 @@ Reply with ONLY one move in SAN notation exactly as shown in the list above. No 
 def ask_gpt(board):
     legal_moves = [board.san(m) for m in board.legal_moves]
     move_history = " ".join([board.san(m) for m in board.move_stack]) if board.move_stack else "Game just started"
-    prompt = f"""You are playing chess as BLACK pieces only. It is BLACK's turn to move.
+    prompt = f"""You are playing chess as BLACK. Choose the best move to win.
 
-Current position (FEN): {board.fen()}
-Move history so far: {move_history}
+Legal moves (SAN notation): {', '.join(legal_moves)}
 
-IMPORTANT: You can ONLY play moves from this list of legal Black moves:
-{', '.join(legal_moves)}
-
-Do NOT play any White piece moves. Only choose from the list above.
-Pick the best move to win the game.
-Reply with ONLY one move in SAN notation exactly as shown in the list above. No explanation."""
+Reply with ONLY one move copied exactly from the list above. Nothing else."""
 
     t0 = time.time()
     response = openai_client.chat.completions.create(
