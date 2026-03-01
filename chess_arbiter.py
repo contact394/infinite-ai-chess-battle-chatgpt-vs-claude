@@ -137,7 +137,7 @@ def get_delay():
 # ── Appel Claude (joue les blancs) ────────────────────────────────────────────
 def ask_claude(board):
     legal_moves = [board.san(m) for m in board.legal_moves]
-    move_history = " ".join([board.san(m) for m in board.move_stack]) if board.move_stack else "Game just started"
+    move_history = " ".join([m.uci() for m in board.move_stack]) if board.move_stack else "Game just started"
     prompt = f"""You are playing chess as WHITE. Choose the best move to win.
 
 Legal moves (SAN notation): {', '.join(legal_moves)}
@@ -157,7 +157,7 @@ Reply with ONLY one move copied exactly from the list above. Nothing else."""
 # ── Appel GPT (joue les noirs) ────────────────────────────────────────────────
 def ask_gpt(board):
     legal_moves = [board.san(m) for m in board.legal_moves]
-    move_history = " ".join([board.san(m) for m in board.move_stack]) if board.move_stack else "Game just started"
+    move_history = " ".join([m.uci() for m in board.move_stack]) if board.move_stack else "Game just started"
     prompt = f"""You are playing chess as BLACK. Choose the best move to win.
 
 Legal moves (SAN notation): {', '.join(legal_moves)}
