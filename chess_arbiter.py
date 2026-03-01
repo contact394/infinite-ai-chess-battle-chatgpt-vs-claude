@@ -138,23 +138,17 @@ def get_delay():
 def ask_claude(board):
     legal_moves = [board.san(m) for m in board.legal_moves]
     move_history = " ".join([board.san(m) for m in board.move_stack]) if board.move_stack else "Game just started"
-    prompt = f"""You are a competitive chess engine playing as White. Your sole objective is to WIN this game.
+    prompt = f"""You are playing chess as WHITE pieces only. It is WHITE's turn to move.
 
 Current position (FEN): {board.fen()}
-Move history: {move_history}
-Legal moves available: {', '.join(legal_moves)}
+Move history so far: {move_history}
 
-Chess rules reminder:
-- Control the center (e4, d4, e5, d5)
-- Develop your pieces early (knights before bishops)
-- Castle early to protect your king
-- Look for tactics: forks, pins, skewers, discovered attacks
-- Always promote pawns to Queen (e.g. e8=Q)
-- If you can checkmate, do it immediately
-- If you are losing material, find the best defensive move
+IMPORTANT: You can ONLY play moves from this list of legal White moves:
+{', '.join(legal_moves)}
 
-You MUST play to win. Analyze the position carefully and choose the strongest move.
-Reply with ONLY the move in SAN notation (e.g. e4, Nf3, O-O, e8=Q). No explanation."""
+Do NOT play any Black piece moves. Only choose from the list above.
+Pick the best move to win the game.
+Reply with ONLY one move in SAN notation exactly as shown in the list above. No explanation."""
 
     t0 = time.time()
     response = claude_client.messages.create(
@@ -170,23 +164,17 @@ Reply with ONLY the move in SAN notation (e.g. e4, Nf3, O-O, e8=Q). No explanati
 def ask_gpt(board):
     legal_moves = [board.san(m) for m in board.legal_moves]
     move_history = " ".join([board.san(m) for m in board.move_stack]) if board.move_stack else "Game just started"
-    prompt = f"""You are a competitive chess engine playing as Black. Your sole objective is to WIN this game.
+    prompt = f"""You are playing chess as BLACK pieces only. It is BLACK's turn to move.
 
 Current position (FEN): {board.fen()}
-Move history: {move_history}
-Legal moves available: {', '.join(legal_moves)}
+Move history so far: {move_history}
 
-Chess rules reminder:
-- Control the center (e4, d4, e5, d5)
-- Develop your pieces early (knights before bishops)
-- Castle early to protect your king
-- Look for tactics: forks, pins, skewers, discovered attacks
-- Always promote pawns to Queen (e.g. e1=Q)
-- If you can checkmate, do it immediately
-- If you are losing material, find the best defensive move
+IMPORTANT: You can ONLY play moves from this list of legal Black moves:
+{', '.join(legal_moves)}
 
-You MUST play to win. Analyze the position carefully and choose the strongest move.
-Reply with ONLY the move in SAN notation (e.g. e5, Nf6, O-O-O, e1=Q). No explanation."""
+Do NOT play any White piece moves. Only choose from the list above.
+Pick the best move to win the game.
+Reply with ONLY one move in SAN notation exactly as shown in the list above. No explanation."""
 
     t0 = time.time()
     response = openai_client.chat.completions.create(
