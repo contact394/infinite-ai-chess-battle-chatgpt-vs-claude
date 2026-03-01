@@ -137,13 +137,24 @@ def get_delay():
 # ── Appel Claude (joue les blancs) ────────────────────────────────────────────
 def ask_claude(board):
     legal_moves = [board.san(m) for m in board.legal_moves]
-    prompt = f"""Tu joues aux échecs. Tu joues les pièces blanches.
-Position actuelle (FEN) : {board.fen()}
-Coups légaux disponibles : {', '.join(legal_moves)}
+    move_history = " ".join([board.san(m) for m in board.move_stack]) if board.move_stack else "Game just started"
+    prompt = f"""You are a competitive chess engine playing as White. Your sole objective is to WIN this game.
 
-Réponds UNIQUEMENT avec un coup en notation SAN (ex: e4, Nf3, O-O).
-Si un pion atteint la dernière rangée, indique toujours la promotion (ex: e8=Q).
-Ne donne aucune explication, juste le coup."""
+Current position (FEN): {board.fen()}
+Move history: {move_history}
+Legal moves available: {', '.join(legal_moves)}
+
+Chess rules reminder:
+- Control the center (e4, d4, e5, d5)
+- Develop your pieces early (knights before bishops)
+- Castle early to protect your king
+- Look for tactics: forks, pins, skewers, discovered attacks
+- Always promote pawns to Queen (e.g. e8=Q)
+- If you can checkmate, do it immediately
+- If you are losing material, find the best defensive move
+
+You MUST play to win. Analyze the position carefully and choose the strongest move.
+Reply with ONLY the move in SAN notation (e.g. e4, Nf3, O-O, e8=Q). No explanation."""
 
     t0 = time.time()
     response = claude_client.messages.create(
@@ -158,13 +169,24 @@ Ne donne aucune explication, juste le coup."""
 # ── Appel GPT (joue les noirs) ────────────────────────────────────────────────
 def ask_gpt(board):
     legal_moves = [board.san(m) for m in board.legal_moves]
-    prompt = f"""Tu joues aux échecs. Tu joues les pièces noires.
-Position actuelle (FEN) : {board.fen()}
-Coups légaux disponibles : {', '.join(legal_moves)}
+    move_history = " ".join([board.san(m) for m in board.move_stack]) if board.move_stack else "Game just started"
+    prompt = f"""You are a competitive chess engine playing as Black. Your sole objective is to WIN this game.
 
-Réponds UNIQUEMENT avec un coup en notation SAN (ex: e5, Nf6, O-O-O).
-Si un pion atteint la dernière rangée, indique toujours la promotion (ex: e1=Q).
-Ne donne aucune explication, juste le coup."""
+Current position (FEN): {board.fen()}
+Move history: {move_history}
+Legal moves available: {', '.join(legal_moves)}
+
+Chess rules reminder:
+- Control the center (e4, d4, e5, d5)
+- Develop your pieces early (knights before bishops)
+- Castle early to protect your king
+- Look for tactics: forks, pins, skewers, discovered attacks
+- Always promote pawns to Queen (e.g. e1=Q)
+- If you can checkmate, do it immediately
+- If you are losing material, find the best defensive move
+
+You MUST play to win. Analyze the position carefully and choose the strongest move.
+Reply with ONLY the move in SAN notation (e.g. e5, Nf6, O-O-O, e1=Q). No explanation."""
 
     t0 = time.time()
     response = openai_client.chat.completions.create(
