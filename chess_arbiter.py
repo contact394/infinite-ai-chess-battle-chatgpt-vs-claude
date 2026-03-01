@@ -74,6 +74,9 @@ def load_state():
         r = req_lib.get(_BIN_URL + "/latest", headers=_BIN_HDR, timeout=10)
         if r.status_code == 200:
             saved = r.json().get("record", {})
+            # If bin is fresh (game_number == 1, no games played), reset start_date to today
+            if saved.get("game_number", 1) == 1 and saved.get("scores", {}).get("claude", 0) == 0 and saved.get("scores", {}).get("gpt", 0) == 0:
+                saved["start_date"] = datetime.datetime.now().strftime("%b %d, %Y")
             state.update(saved)
             print("✅ State loaded from JSONBin")
         else:
@@ -83,11 +86,13 @@ def load_state():
 
 def save_game_to_history(game_number, result, pgn_str, move_count):
     """Append completed game to history bin."""
-    if not _HIST_BIN_ID:
+    hist_id = os.environ.get("JSONBIN_HISTORY_BIN_ID", "")
+    if not hist_id:
         return
+    hist_url = f"https://api.jsonbin.io/v3/b/{hist_id}"
     try:
         # Load current history
-        r = req_lib.get(_HIST_BIN_URL + "/latest", headers=_BIN_HDR, timeout=10)
+        r = req_lib.get(hist_url + "/latest", headers=_BIN_HDR, timeout=10)
         history = r.json().get("record", {}).get("games", []) if r.status_code == 200 else []
 
         # Map result to label
@@ -107,7 +112,7 @@ def save_game_to_history(game_number, result, pgn_str, move_count):
             "pgn": pgn_str
         })
 
-        req_lib.put(_HIST_BIN_URL, json={"games": history}, headers=_BIN_HDR, timeout=10)
+        req_lib.put(hist_url, json={"games": history}, headers=_BIN_HDR, timeout=10)
         print(f"📚 Game #{game_number} saved to history")
     except Exception as e:
         print(f"⚠️  History save error: {e}")
@@ -338,10 +343,12 @@ def history_page():
 
 @app.route("/api/history")
 def api_history():
-    if not _HIST_BIN_ID:
+    hist_id = os.environ.get("JSONBIN_HISTORY_BIN_ID", "")
+    if not hist_id:
         return jsonify({"games": []})
     try:
-        r = req_lib.get(_HIST_BIN_URL + "/latest", headers=_BIN_HDR, timeout=10)
+        hist_url = f"https://api.jsonbin.io/v3/b/{hist_id}/latest"
+        r = req_lib.get(hist_url, headers=_BIN_HDR, timeout=10)
         games = r.json().get("record", {}).get("games", []) if r.status_code == 200 else []
         return jsonify({"games": list(reversed(games))})
     except Exception as e:
