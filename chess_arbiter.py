@@ -131,23 +131,28 @@ def save_game_to_history(game_number, result, pgn_str, move_count):
 
 # ── Cadence ───────────────────────────────────────────────────────────────────
 def get_delay():
-    """10 minutes fixes entre chaque partie"""
-    return 600
+    """Attend jusqu'à la prochaine heure ronde (14h00, 15h00, etc.)"""
+    now = datetime.datetime.now()
+    next_hour = (now + datetime.timedelta(hours=1)).replace(minute=0, second=0, microsecond=0)
+    return int((next_hour - now).total_seconds())
 
 # ── Appel Claude (joue les blancs) ────────────────────────────────────────────
 def ask_claude(board):
     legal_moves = [board.san(m) for m in board.legal_moves]
-    move_history = " ".join([m.uci() for m in board.move_stack]) if board.move_stack else "Game just started"
-    prompt = f"""You are playing chess as WHITE. Choose the best move to win.
+    prompt = f"""You are a chess grandmaster playing as WHITE. Analyze the position and find the best move.
 
-Legal moves (SAN notation): {', '.join(legal_moves)}
+Position (FEN): {board.fen()}
+Your legal moves: {', '.join(legal_moves)}
 
-Reply with ONLY one move copied exactly from the list above. Nothing else."""
+Think briefly about the best strategy (1 sentence), then reply with your chosen move.
+Format: MOVE: <move in SAN notation from the list above>
+
+Example: MOVE: e4"""
 
     t0 = time.time()
     response = claude_client.messages.create(
         model="claude-haiku-4-5-20251001",
-        max_tokens=20,
+        max_tokens=50,
         messages=[{"role": "user", "content": prompt}]
     )
     elapsed_ms = int((time.time() - t0) * 1000)
@@ -157,17 +162,20 @@ Reply with ONLY one move copied exactly from the list above. Nothing else."""
 # ── Appel GPT (joue les noirs) ────────────────────────────────────────────────
 def ask_gpt(board):
     legal_moves = [board.san(m) for m in board.legal_moves]
-    move_history = " ".join([m.uci() for m in board.move_stack]) if board.move_stack else "Game just started"
-    prompt = f"""You are playing chess as BLACK. Choose the best move to win.
+    prompt = f"""You are a chess grandmaster playing as BLACK. Analyze the position and find the best move.
 
-Legal moves (SAN notation): {', '.join(legal_moves)}
+Position (FEN): {board.fen()}
+Your legal moves: {', '.join(legal_moves)}
 
-Reply with ONLY one move copied exactly from the list above. Nothing else."""
+Think briefly about the best strategy (1 sentence), then reply with your chosen move.
+Format: MOVE: <move in SAN notation from the list above>
+
+Example: MOVE: e5"""
 
     t0 = time.time()
     response = openai_client.chat.completions.create(
         model="gpt-4o-mini",
-        max_tokens=20,
+        max_tokens=50,
         messages=[{"role": "user", "content": prompt}]
     )
     elapsed_ms = int((time.time() - t0) * 1000)
@@ -176,28 +184,38 @@ Reply with ONLY one move copied exactly from the list above. Nothing else."""
 
 # ── Valider et jouer un coup ──────────────────────────────────────────────────
 def parse_move(board, raw):
-    """Tente de parser un coup en SAN ou UCI."""
-    clean = raw.replace("?","").replace("!","").replace("+","").replace("#","").strip()
-    # Essai SAN
+    """Tente de parser un coup depuis une réponse libre."""
+    # Extraire après "MOVE:" si présent
+    text = raw.strip()
+    if "MOVE:" in text.upper():
+        text = text.upper().split("MOVE:")[-1].strip()
+        # Récupérer juste le premier mot
+        text = text.split()[0] if text.split() else text
+
+    clean = text.replace("?","").replace("!","").replace("+","").replace("#","").strip()
+
+    # Essai SAN direct
     try:
         move = board.parse_san(clean)
         if move in board.legal_moves:
             return move
     except Exception:
         pass
-    # Essai UCI (ex: e2e4, e7e5)
+
+    # Essai UCI (ex: e2e4)
     try:
         move = chess.Move.from_uci(clean.lower())
         if move in board.legal_moves:
             return move
     except Exception:
         pass
-    # Essai correspondance dans les coups légaux (match partiel)
+
+    # Correspondance dans la liste des coups légaux
     for legal_move in board.legal_moves:
-        if board.san(legal_move).replace("+","").replace("#","") == clean:
+        san = board.san(legal_move).replace("+","").replace("#","")
+        if san == clean or legal_move.uci() == clean.lower():
             return legal_move
-        if legal_move.uci() == clean.lower():
-            return legal_move
+
     return None
 
 def play_move(board, move_san, max_retries=5):
@@ -370,6 +388,10 @@ def contact():
 @app.route("/history.html")
 def history_page():
     return app.send_static_file("history.html")
+
+@app.route("/stats.html")
+def stats_page():
+    return app.send_static_file("stats.html")
 
 @app.route("/api/history")
 def api_history():
