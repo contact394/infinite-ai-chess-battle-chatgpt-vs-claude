@@ -273,30 +273,33 @@ def tactical_alerts(board, color):
     """Détecte les tactiques immédiates : mat en 1, pièces en prise, coups d'échec."""
     alerts = []
 
-    # Pré-calcul des SAN avant tout push/pop pour éviter les erreurs
-    legal_moves_list = list(board.legal_moves)
+    # Travailler sur une COPIE du plateau pour ne jamais altérer l'original
+    b = board.copy()
+    legal_moves_list = list(b.legal_moves)
+
+    # Pré-calcul SAN sur la copie avant tout push/pop
     move_san_map = {}
     for move in legal_moves_list:
         try:
-            move_san_map[move.uci()] = board.san(move)
+            move_san_map[move.uci()] = b.san(move)
         except Exception:
             move_san_map[move.uci()] = move.uci()
 
     # Mat en 1 — priorité absolue
     for move in legal_moves_list:
         try:
-            board.push(move)
-            if board.is_checkmate():
+            b.push(move)
+            if b.is_checkmate():
                 san = move_san_map.get(move.uci(), move.uci())
                 alerts.append(f"🏆 CHECKMATE IN ONE: {san} — play this immediately!")
-            board.pop()
+            b.pop()
         except Exception:
             try:
-                board.pop()
+                b.pop()
             except Exception:
                 pass
 
-    # Pièces en prise non défendues (hanging)
+    # Pièces en prise non défendues (hanging) — sur le plateau original, sans push/pop
     for sq in chess.SQUARES:
         piece = board.piece_at(sq)
         if piece and piece.color == color:
@@ -312,16 +315,13 @@ def tactical_alerts(board, color):
     checking_moves = []
     for move in legal_moves_list:
         try:
-            board.push(move)
-            if board.is_check():
+            b2 = board.copy()
+            b2.push(move)
+            if b2.is_check():
                 san = move_san_map.get(move.uci(), move.uci())
                 checking_moves.append(san)
-            board.pop()
         except Exception:
-            try:
-                board.pop()
-            except Exception:
-                pass
+            pass
     if checking_moves:
         alerts.append(f"✅ Moves that give check: {', '.join(checking_moves[:6])}")
 
@@ -381,11 +381,12 @@ def build_board_analysis(board, color):
     my_king_safety    = king_safety(board, color)
     enemy_king_safety = king_safety(board, opp_color)
 
-    # Alertes tactiques
-    tactics = tactical_alerts(board, color)
+    # Coups légaux SAN — AVANT tout push/pop dans les sous-fonctions
+    legal_moves_snap = list(board.legal_moves)
+    legal_moves_san  = sorted([board.san(m) for m in legal_moves_snap])
 
     # Mobilité
-    my_mobility = len(list(board.legal_moves))
+    my_mobility = len(legal_moves_snap)
 
     # Contrôle du centre
     center_squares = [chess.E4, chess.E5, chess.D4, chess.D5]
@@ -395,8 +396,8 @@ def build_board_analysis(board, color):
     # Historique des coups
     move_history = format_move_history(board, last_n=14)
 
-    # Coups légaux SAN
-    legal_moves_san = sorted([board.san(m) for m in board.legal_moves])
+    # Alertes tactiques (push/pop internes — liste des coups déjà gelée)
+    tactics = tactical_alerts(board, color)
 
     lines = [
         "=" * 62,
