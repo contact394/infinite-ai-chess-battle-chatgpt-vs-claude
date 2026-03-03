@@ -273,12 +273,28 @@ def tactical_alerts(board, color):
     """Détecte les tactiques immédiates : mat en 1, pièces en prise, coups d'échec."""
     alerts = []
 
+    # Pré-calcul des SAN avant tout push/pop pour éviter les erreurs
+    legal_moves_list = list(board.legal_moves)
+    move_san_map = {}
+    for move in legal_moves_list:
+        try:
+            move_san_map[move.uci()] = board.san(move)
+        except Exception:
+            move_san_map[move.uci()] = move.uci()
+
     # Mat en 1 — priorité absolue
-    for move in board.legal_moves:
-        board.push(move)
-        if board.is_checkmate():
-            alerts.append(f"🏆 CHECKMATE IN ONE: {move.uci()} — play this immediately!")
-        board.pop()
+    for move in legal_moves_list:
+        try:
+            board.push(move)
+            if board.is_checkmate():
+                san = move_san_map.get(move.uci(), move.uci())
+                alerts.append(f"🏆 CHECKMATE IN ONE: {san} — play this immediately!")
+            board.pop()
+        except Exception:
+            try:
+                board.pop()
+            except Exception:
+                pass
 
     # Pièces en prise non défendues (hanging)
     for sq in chess.SQUARES:
@@ -294,11 +310,18 @@ def tactical_alerts(board, color):
 
     # Coups donnant échec disponibles
     checking_moves = []
-    for move in board.legal_moves:
-        board.push(move)
-        if board.is_check():
-            checking_moves.append(move.uci())
-        board.pop()
+    for move in legal_moves_list:
+        try:
+            board.push(move)
+            if board.is_check():
+                san = move_san_map.get(move.uci(), move.uci())
+                checking_moves.append(san)
+            board.pop()
+        except Exception:
+            try:
+                board.pop()
+            except Exception:
+                pass
     if checking_moves:
         alerts.append(f"✅ Moves that give check: {', '.join(checking_moves[:6])}")
 
@@ -569,18 +592,25 @@ def parse_move(board, raw):
 def play_move(board, move_san, max_retries=5):
     """Tente de jouer un coup, retente si illégal."""
     for attempt in range(max_retries):
-        move = parse_move(board, move_san)
-        if move:
-            uci = move.uci()
-            san = board.san(move)
-            board.push(move)
-            return san, uci[:2], uci[2:4]
+        try:
+            move = parse_move(board, move_san)
+            if move and move in board.legal_moves:
+                uci = move.uci()
+                san = board.san(move)
+                board.push(move)
+                return san, uci[:2], uci[2:4]
+        except Exception as e:
+            print(f"  ⚠️  Erreur validation coup '{move_san}': {e}")
 
-        print(f"  Coup illégal '{move_san}', nouvelle tentative {attempt+1}...")
-        if board.turn == chess.WHITE:
-            move_san = ask_claude(board)
-        else:
-            move_san = ask_gpt(board)
+        print(f"  Coup illégal '{move_san}', nouvelle tentative {attempt+1}/{max_retries}...")
+        try:
+            if board.turn == chess.WHITE:
+                move_san = ask_claude(board)
+            else:
+                move_san = ask_gpt(board)
+        except Exception as e:
+            print(f"  ❌ Erreur API lors du retry {attempt+1}: {e}")
+            time.sleep(5)
 
     # Dernier recours : coup aléatoire légal
     import random
